@@ -1,59 +1,54 @@
-import streamlit as st
 import pandas as pd
 
-# Función para calcular el P.A.P.A.
-def calcular_papa(materias, calificaciones, creditos):
-    suma_ponderada = sum([calificaciones[i] * creditos[i] for i in range(len(materias))])
-    suma_creditos = sum(creditos)
-    papa = suma_ponderada / suma_creditos
-    return papa
+# Función para calcular el PAPA
+def calcular_papa(df):
+    # Cálculo del PAPA Global
+    total_creditos = df['Créditos'].sum()
+    promedio_ponderado = (df['Calificación'] * df['Créditos']).sum() / total_creditos
+    return promedio_ponderado
 
-# Pantalla principal de la app
-def mostrar_dashboard():
-    st.title("Calculadora de P.A.P.A. - Promedio Académico Ponderado Acumulado")
-    
-    # Ingreso de datos por parte del usuario
-    st.header("Ingresa los datos de tus materias")
+def calcular_papa_por_tipologia(df, tipo_asignatura):
+    # Filtrar por tipo de asignatura
+    df_tipo = df[df['Tipo'] == tipo_asignatura]
+    total_creditos = df_tipo['Créditos'].sum()
+    if total_creditos == 0:
+        return 0
+    promedio_ponderado = (df_tipo['Calificación'] * df_tipo['Créditos']).sum() / total_creditos
+    return promedio_ponderado
 
-    # Crear un formulario para ingresar varias materias
-    num_materias = st.number_input("Número de materias", min_value=1, max_value=20, value=1)
+# Título de la app
+st.title("Calculadora de PAPA - Universidad Nacional de Colombia")
 
-    # Crear listas para almacenar los datos
-    materias = []
-    calificaciones = []
-    creditos = []
+# Entrada de datos: materias, calificaciones, créditos y tipo de asignatura
+materias = st.text_area("Introduce las materias, separadas por coma").split(',')
+calificaciones = st.text_area("Introduce las calificaciones correspondientes, separadas por coma").split(',')
+creditos = st.text_area("Introduce los créditos correspondientes, separados por coma").split(',')
+tipos = st.text_area("Introduce el tipo de asignatura (teórica, práctica, etc.), separadas por coma").split(',')
 
-    for i in range(num_materias):
-        st.subheader(f"Materia {i+1}")
-        materia = st.text_input(f"Nombre de la materia {i+1}", key=f"materia_{i}")
-        calificacion = st.number_input(f"Calificación obtenida en {materia}", min_value=0.0, max_value=5.0, step=0.1, key=f"calificacion_{i}")
-        credito = st.number_input(f"Créditos de {materia}", min_value=1, max_value=10, step=1, key=f"credito_{i}")
-        
-        # Almacenamos los valores ingresados
-        if materia and calificacion and credito:
-            materias.append(materia)
-            calificaciones.append(calificacion)
-            creditos.append(credito)
-    
-    # Crear DataFrame con los datos ingresados
-    datos = pd.DataFrame({
-        "Materia": materias,
-        "Calificación": calificaciones,
-        "Créditos": creditos
-    })
+# Convertir entradas a listas
+materias = [m.strip() for m in materias]
+calificaciones = [float(c.strip()) for c in calificaciones]
+creditos = [int(c.strip()) for c in creditos]
+tipos = [t.strip() for t in tipos]
 
-    # Botón para calcular el P.A.P.A.
-    if st.button("Calcular P.A.P.A."):
-        if len(materias) > 0:
-            # Calcular el P.A.P.A.
-            papa = calcular_papa(materias, calificaciones, creditos)
-            st.subheader("Resultado del cálculo del P.A.P.A.")
-            st.write(f"Tu **P.A.P.A.** es: {papa:.2f}")
-            st.write("Detalles de tus materias:")
-            st.dataframe(datos)
-        else:
-            st.warning("Por favor, ingresa los datos de al menos una materia para calcular el P.A.P.A.")
+# Crear un DataFrame con los datos ingresados
+df = pd.DataFrame({
+    'Materia': materias,
+    'Calificación': calificaciones,
+    'Créditos': creditos,
+    'Tipo': tipos
+})
 
-if __name__ == "__main__":
-    mostrar_dashboard()
+# Mostrar los datos ingresados
+st.write("Datos ingresados:", df)
 
+# Cálculo del PAPA global
+papa_global = calcular_papa(df)
+st.write(f"**PAPA Global:** {papa_global:.2f}")
+
+# Seleccionar tipo de asignatura para calcular el PAPA por tipología
+tipo_asignatura = st.selectbox("Selecciona el tipo de asignatura para calcular el PAPA por tipología", df['Tipo'].unique())
+
+# Cálculo del PAPA por tipología
+papa_tipologia = calcular_papa_por_tipologia(df, tipo_asignatura)
+st.write(f"**PAPA por tipo '{tipo_asignatura}':** {papa_tipologia:.2f}")
