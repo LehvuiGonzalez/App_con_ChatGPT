@@ -7,18 +7,19 @@ import os
 csv_file = 'registro_finanzas.csv'
 
 # Función para almacenar los datos
-def guardar_datos(tipo, monto, fecha):
+def guardar_datos(tipo, monto, fecha, presupuesto_restante):
     data = {
         'fecha': fecha,
         'tipo': tipo,
-        'monto': monto
+        'monto': monto,
+        'presupuesto_restante': presupuesto_restante
     }
     
     # Verificar si el archivo CSV existe, si no, crear uno nuevo
     if os.path.exists(csv_file):
         df = pd.read_csv(csv_file)
     else:
-        df = pd.DataFrame(columns=['fecha', 'tipo', 'monto'])
+        df = pd.DataFrame(columns=['fecha', 'tipo', 'monto', 'presupuesto_restante'])
     
     # Agregar la nueva entrada
     df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
@@ -56,36 +57,28 @@ else:
 
 # Botón para guardar los datos
 if st.button("Guardar Datos"):
+    # Inicializar el presupuesto restante
+    if os.path.exists(csv_file):
+        df = pd.read_csv(csv_file)
+        total_ingresos = df[df['tipo'] == 'Ingreso']['monto'].apply(lambda x: float(x.replace('$', '').replace(',', ''))).sum()
+        total_gastos = df[df['tipo'] == 'Gasto']['monto'].apply(lambda x: float(x.replace('$', '').replace(',', ''))).sum()
+        presupuesto_restante = presupuesto_inicial + total_ingresos - total_gastos
+    else:
+        presupuesto_restante = presupuesto_inicial
+    
+    # Guardar los datos en función de la transacción seleccionada
     if tipo_transaccion == "Ingreso" and ingreso_monto > 0:
-        df = guardar_datos("Ingreso", ingreso_monto, fecha_seleccionada)
+        df = guardar_datos("Ingreso", ingreso_monto, fecha_seleccionada, presupuesto_restante)
         st.write("Ingreso guardado correctamente")
     elif tipo_transaccion == "Gasto" and gasto_monto > 0:
-        df = guardar_datos("Gasto", gasto_monto, fecha_seleccionada)
+        df = guardar_datos("Gasto", gasto_monto, fecha_seleccionada, presupuesto_restante)
         st.write("Gasto guardado correctamente")
     elif tipo_transaccion == "Ingreso y Gasto" and ingreso_monto > 0 and gasto_monto > 0:
-        # Si es "Ingreso y Gasto", se guardan ambos valores
-        df_ingreso = guardar_datos("Ingreso", ingreso_monto, fecha_seleccionada)
-        df_gasto = guardar_datos("Gasto", gasto_monto, fecha_seleccionada)
+        df_ingreso = guardar_datos("Ingreso", ingreso_monto, fecha_seleccionada, presupuesto_restante)
+        df_gasto = guardar_datos("Gasto", gasto_monto, fecha_seleccionada, presupuesto_restante)
         st.write("Ingreso y Gasto guardados correctamente")
     else:
         st.write("Por favor ingresa un monto mayor a 0 para Ingreso o Gasto")
-
-# Mostrar el presupuesto restante
-st.subheader(f"Presupuesto Restante: ${presupuesto_inicial:,.2f}")
-
-# Calcular el presupuesto restante basado en los ingresos y gastos
-if os.path.exists(csv_file):
-    df = pd.read_csv(csv_file)
-    # Sumar los ingresos y los gastos
-    total_ingresos = df[df['tipo'] == 'Ingreso']['monto'].sum()
-    total_gastos = df[df['tipo'] == 'Gasto']['monto'].sum()
-    
-    # Calcular el presupuesto restante
-    presupuesto_restante = presupuesto_inicial + total_ingresos - total_gastos
-    st.subheader(f"Presupuesto Restante: ${presupuesto_restante:,.2f}")
-else:
-    presupuesto_restante = presupuesto_inicial
-    st.write("Aún no hay registros.")
 
 # Mostrar la tabla de registros
 st.subheader("Registros de Finanzas")
@@ -94,9 +87,12 @@ st.subheader("Registros de Finanzas")
 if os.path.exists(csv_file):
     df = pd.read_csv(csv_file)
     df['monto'] = df['monto'].apply(lambda x: f"${x:,.2f}")  # Formatear los montos como pesos
+    df['presupuesto_restante'] = df['presupuesto_restante'].apply(lambda x: f"${x:,.2f}")  # Formatear el presupuesto restante como pesos
     st.write(df)
+
 else:
     st.write("Aún no hay registros.")
+
 
 
 
