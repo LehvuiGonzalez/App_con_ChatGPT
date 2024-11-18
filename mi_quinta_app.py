@@ -1,92 +1,112 @@
 import streamlit as st
+import math
+import random
 import numpy as np
-import pygame
-from streamlit_canvas import st_canvas
+from streamlit_drawable_canvas import st_canvas
 
-# Inicializar pygame
-pygame.init()
+# Función para analizar la operación matemática y dividirla en componentes
+def parse_expression(expression):
+    # Dividir la expresión en números y operadores
+    numbers = [int(s) for s in expression.split() if s.isdigit()]
+    operators = [s for s in expression.split() if not s.isdigit()]
+    return numbers, operators
 
-# Configurar el tamaño de la ventana
-screen_width, screen_height = 800, 600
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Animación de Operación Matemática")
-
-# Colores
-WHITE = (255, 255, 255)
-BLUE = (0, 0, 255)
-RED = (255, 0, 0)
-
-# Configuración de partículas
-class Particle:
-    def __init__(self, x, y, dx, dy, color):
-        self.x = x
-        self.y = y
-        self.dx = dx
-        self.dy = dy
-        self.color = color
-
-    def move(self):
-        self.x += self.dx
-        self.y += self.dy
-        self.dy += 0.1  # Efecto de gravedad
-        if self.x > screen_width or self.x < 0:
-            self.dx *= -1
-        if self.y > screen_height:
-            self.dy *= -0.9  # Rebote
-            self.y = screen_height - 1
-
-    def draw(self):
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), 5)
-
-# Crear partículas
-def generate_particles(x, y, num_particles=50, color=BLUE):
+# Crear un flujo de partículas para la operación matemática
+def generate_particle_flow(numbers, operators, canvas_width, canvas_height):
     particles = []
-    for _ in range(num_particles):
-        dx = np.random.uniform(-2, 2)
-        dy = np.random.uniform(-5, -1)
-        particles.append(Particle(x, y, dx, dy, color))
+    x_pos = 50
+    y_pos = 100
+
+    # Generar partículas para los números
+    for number in numbers:
+        particles.append({
+            'type': 'number',
+            'value': number,
+            'x': x_pos,
+            'y': y_pos,
+            'dx': random.uniform(1, 3),
+            'dy': random.uniform(-1, 1),
+        })
+        x_pos += 50  # Desplazamiento horizontal
+
+    # Generar partículas para los operadores
+    for operator in operators:
+        particles.append({
+            'type': 'operator',
+            'value': operator,
+            'x': x_pos,
+            'y': y_pos,
+            'dx': random.uniform(1, 3),
+            'dy': random.uniform(-1, 1),
+        })
+        x_pos += 50  # Desplazamiento horizontal
+
+    # Generar partículas para los resultados
+    result = eval(' '.join([str(num) for num in numbers] + operators))
+    particles.append({
+        'type': 'result',
+        'value': result,
+        'x': x_pos,
+        'y': y_pos,
+        'dx': random.uniform(1, 3),
+        'dy': random.uniform(-1, 1),
+    })
+
+    return particles, result
+
+# Función para actualizar las partículas
+def update_particles(particles, canvas_width, canvas_height):
+    for particle in particles:
+        particle['x'] += particle['dx']
+        particle['y'] += particle['dy']
+        
+        # Rebotar las partículas al llegar al borde
+        if particle['x'] <= 0 or particle['x'] >= canvas_width:
+            particle['dx'] = -particle['dx']
+        if particle['y'] <= 0 or particle['y'] >= canvas_height:
+            particle['dy'] = -particle['dy']
     return particles
 
-# Lógica de animación
-def animate_operation():
-    # Operación matemática
-    number1 = 45
-    number2 = 56
-    result = number1 + number2
+# Streamlit app
+st.title("Operación Matemática como Flujo de Partículas")
 
-    # Animación de la operación
-    particles = generate_particles(screen_width // 2, screen_height // 2)
+# Input de la operación matemática
+expression = st.text_input("Ingresa una operación matemática (Ej: 3 + 5 * 2):", "3 + 5 * 2")
 
-    # Bucle de animación
-    running = True
-    clock = pygame.time.Clock()
+# Análisis de la operación
+numbers, operators = parse_expression(expression)
+canvas_width = 700
+canvas_height = 500
 
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+# Crear lienzo interactivo para el flujo de partículas
+canvas_result = st_canvas(
+    fill_color="white",  # Color de fondo
+    stroke_color="black",  # Color del trazo
+    stroke_width=2,  # Grosor del trazo
+    background_color="white",  # Color de fondo del canvas
+    width=canvas_width,  # Ancho
+    height=canvas_height,  # Alto
+    drawing_mode="freedraw",  # Modo de dibujo libre
+    key="canvas",
+)
 
-        # Rellenar pantalla de blanco
-        screen.fill(WHITE)
+# Generar y mostrar el flujo de partículas
+if expression:
+    particles, result = generate_particle_flow(numbers, operators, canvas_width, canvas_height)
+    
+    # Actualizar las partículas
+    particles = update_particles(particles, canvas_width, canvas_height)
 
-        # Dibujar partículas
-        for particle in particles:
-            particle.move()
-            particle.draw()
+    # Dibujar las partículas en el lienzo
+    for particle in particles:
+        if particle['type'] == 'number':
+            st.markdown(f"**Número:** {particle['value']} ({particle['x']}, {particle['y']})")
+        elif particle['type'] == 'operator':
+            st.markdown(f"**Operador:** {particle['value']} ({particle['x']}, {particle['y']})")
+        elif particle['type'] == 'result':
+            st.markdown(f"**Resultado:** {particle['value']} ({particle['x']}, {particle['y']})")
 
-        # Mostrar la operación en la pantalla
-        font = pygame.font.Font(None, 74)
-        text = font.render(f'{number1} + {number2} = {result}', True, RED)
-        screen.blit(text, (screen_width // 2 - text.get_width() // 2, 50))
+    # Mostrar el resultado de la operación
+    st.write(f"El resultado de la operación es: {result}")
 
-        pygame.display.flip()
-
-        # Limitar la tasa de frames
-        clock.tick(60)
-
-    pygame.quit()
-
-# Ejecutar la animación en la app de Streamlit
-if st.button('Ver animación de operación'):
-    animate_operation()
 
