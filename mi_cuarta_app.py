@@ -77,3 +77,8 @@ if len(materias) > 0:
         papa_tipologia = calcular_papa_por_tipologia(df, tipo_asignatura)
         st.write(f"**PAPA por tipo '{tipo_asignatura}':** {papa_tipologia:.2f}")
 
+# Añadir un pie de página con el nombre del creador de la app
+st.write("\n")
+st.write("---")
+st.write("App creada por **Lehvui Gonzalez Cardona**")
+
