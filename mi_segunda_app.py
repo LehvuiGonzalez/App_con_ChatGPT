@@ -67,7 +67,7 @@ def convert_units(category, conversion_type, value):
     return conversions[conversion_type](value)
 
 # Configuración de la aplicación
-st.title("Conversor Universal en Tiempo Real")
+st.title("Conversor Universal")
 st.write("Selecciona una categoría, un tipo de conversión y proporciona un valor.")
 
 # Selección de categoría
