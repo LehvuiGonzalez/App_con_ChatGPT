@@ -50,13 +50,18 @@ def mostrar_dashboard():
         "Tipo": tipos_materia
     })
 
-    if len(materias) > 0:
-        # Calcular el P.A.P.A.
-        papa = calcular_papa(datos)
-        st.subheader("Resultado del cálculo del P.A.P.A.")
-        st.write(f"Tu **P.A.P.A.** es: {papa:.2f}")
-        st.write("Detalles de tus materias:")
-        st.dataframe(datos)
+    # Botón para calcular el P.A.P.A.
+    if st.button("Calcular P.A.P.A."):
+        if len(materias) > 0:
+            # Calcular el P.A.P.A.
+            papa = calcular_papa(datos)
+            st.subheader("Resultado del cálculo del P.A.P.A.")
+            st.write(f"Tu **P.A.P.A.** es: {papa:.2f}")
+            st.write("Detalles de tus materias:")
+            st.dataframe(datos)
+        else:
+            st.warning("Por favor, ingresa los datos de al menos una materia para calcular el P.A.P.A.")
 
 if __name__ == "__main__":
     mostrar_dashboard()
+
