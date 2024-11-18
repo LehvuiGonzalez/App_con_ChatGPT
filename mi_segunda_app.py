@@ -66,7 +66,7 @@ def convert_units(category, conversion_type, value):
     return conversions[conversion_type](value)
 
 # Configuración de la aplicación
-st.title("Conversor Universal")
+st.title("Conversor Universal en Tiempo Real")
 st.write("Selecciona una categoría, un tipo de conversión y proporciona un valor.")
 
 # Selección de categoría
@@ -85,10 +85,12 @@ categories = {
 
 category = st.selectbox("Selecciona una categoría", list(categories.keys()))
 conversion_type = st.selectbox("Selecciona un tipo de conversión", categories[category])
-value = st.number_input("Ingresa el valor a convertir", min_value=0.0)
 
-# Conversión y resultado
-if st.button("Convertir"):
+# Ingreso del valor para la conversión
+value = st.number_input("Ingresa el valor a convertir", min_value=0.0, step=0.1)
+
+# Si se ingresa un valor, realizar la conversión en tiempo real
+if value:
     result = convert_units(category, conversion_type, value)
-    st.success(f"El resultado es: {result}")
+    st.write(f"El resultado de la conversión es: {result}")
 
