@@ -10,19 +10,8 @@ def guardar_datos(ingresos, gastos, presupuesto, fecha):
         'gastos': gastos,
         'presupuesto': presupuesto
     }
-    
-    # Cargar el archivo CSV si existe, si no, crear uno nuevo
-    try:
-        df = pd.read_csv('finanzas.csv')
-    except FileNotFoundError:
-        df = pd.DataFrame(columns=['fecha', 'ingresos', 'gastos', 'presupuesto'])
-    
-    # Agregar la nueva entrada
-    df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
-    
-    # Guardar el DataFrame actualizado en el archivo CSV
-    df.to_csv('finanzas.csv', index=False)
-    
+    # Crear un DataFrame solo durante la sesión
+    df = pd.DataFrame([data])
     return df
 
 # Función para calcular las diferencias
@@ -32,6 +21,9 @@ def calcular_diferencias(df):
 
 # Título de la app
 st.title("Registro de Finanzas Personales")
+
+# Mostrar nombre del creador
+st.write("Creador: Lehvui Gonzalez Cardona")
 
 # Entrada de datos
 st.header("Ingresar Datos Financieros")
@@ -52,11 +44,16 @@ if st.button("Guardar Datos"):
 # Mostrar el reporte de diferencias
 st.header("Reporte de Diferencias")
 
-# Cargar los datos históricos desde el archivo CSV
-try:
-    df_existing = pd.read_csv('finanzas.csv')
-    df_report = calcular_diferencias(df_existing)
-    st.write("Reporte de las diferencias entre lo presupuestado y lo real:")
-    st.write(df_report)
-except FileNotFoundError:
-    st.write("No hay datos disponibles para mostrar.")
+# Crear un DataFrame vacío para mostrar los datos del reporte
+df_existing = pd.DataFrame({
+    'fecha': [fecha_seleccionada],
+    'ingresos': [ingresos],
+    'gastos': [gastos],
+    'presupuesto': [presupuesto]
+})
+
+df_report = calcular_diferencias(df_existing)
+
+st.write("Reporte de las diferencias entre lo presupuestado y lo real:")
+st.write(df_report)
+
