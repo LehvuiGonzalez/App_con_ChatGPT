@@ -78,16 +78,16 @@ if st.button("Pintar"):
         for _ in range(30):  # Ejecutar varias iteraciones para simular el movimiento
             particles = update_particles(particles, canvas_width, canvas_height)
 
-            # Crear el lienzo y dibujar las partículas
-            canvas.markdown("### Operación en flujo de partículas")
-            canvas.markdown("<br>")
+            # Crear el lienzo y dibujar las partículas usando st.write
+            canvas.write("### Operación en flujo de partículas")
             for particle in particles:
                 particle_position = f"({particle['x']:.2f}, {particle['y']:.2f})"
                 if particle['type'] == 'number':
-                    canvas.markdown(f"<span style='color:{particle['color']}'>**Número:** {particle['value']} en posición {particle_position}</span>")
+                    canvas.write(f"<span style='color:{particle['color']}'>**Número:** {particle['value']} en posición {particle_position}</span>")
                 elif particle['type'] == 'operator':
-                    canvas.markdown(f"<span style='color:{particle['color']}'>**Operador:** {particle['value']} en posición {particle_position}</span>")
+                    canvas.write(f"<span style='color:{particle['color']}'>**Operador:** {particle['value']} en posición {particle_position}</span>")
             
             # Hacer una pausa entre iteraciones para simular el movimiento de las partículas
             time.sleep(0.1)
+
 
