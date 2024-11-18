@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 
 # Función para calcular el P.A.P.A.
-def calcular_papa(datos):
-    suma_ponderada = sum(datos['Calificación'] * datos['Créditos'])
-    suma_creditos = sum(datos['Créditos'])
+def calcular_papa(materias, calificaciones, creditos):
+    suma_ponderada = sum([calificaciones[i] * creditos[i] for i in range(len(materias))])
+    suma_creditos = sum(creditos)
     papa = suma_ponderada / suma_creditos
     return papa
 
@@ -22,9 +22,6 @@ def mostrar_dashboard():
     materias = []
     calificaciones = []
     creditos = []
-    tipos_materia = []
-
-    tipos = ["Optativa", "Obligatoria", "Libre", "Otra"]  # Tipos de materias
 
     for i in range(num_materias):
         st.subheader(f"Materia {i+1}")
@@ -32,29 +29,24 @@ def mostrar_dashboard():
         calificacion = st.number_input(f"Calificación obtenida en {materia}", min_value=0.0, max_value=5.0, step=0.1, key=f"calificacion_{i}")
         credito = st.number_input(f"Créditos de {materia}", min_value=1, max_value=10, step=1, key=f"credito_{i}")
         
-        # Selección del tipo de materia
-        tipo_materia = st.selectbox(f"Tipo de {materia}", tipos, key=f"tipo_{i}")
-        
         # Almacenamos los valores ingresados
         if materia and calificacion and credito:
             materias.append(materia)
             calificaciones.append(calificacion)
             creditos.append(credito)
-            tipos_materia.append(tipo_materia)
     
     # Crear DataFrame con los datos ingresados
     datos = pd.DataFrame({
         "Materia": materias,
         "Calificación": calificaciones,
-        "Créditos": creditos,
-        "Tipo": tipos_materia
+        "Créditos": creditos
     })
 
     # Botón para calcular el P.A.P.A.
     if st.button("Calcular P.A.P.A."):
         if len(materias) > 0:
             # Calcular el P.A.P.A.
-            papa = calcular_papa(datos)
+            papa = calcular_papa(materias, calificaciones, creditos)
             st.subheader("Resultado del cálculo del P.A.P.A.")
             st.write(f"Tu **P.A.P.A.** es: {papa:.2f}")
             st.write("Detalles de tus materias:")
@@ -64,3 +56,4 @@ def mostrar_dashboard():
 
 if __name__ == "__main__":
     mostrar_dashboard()
+
