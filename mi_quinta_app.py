@@ -1,8 +1,7 @@
 import streamlit as st
 import random
 import time
-import matplotlib.pyplot as plt
-import numpy as np
+from streamlit_drawable_canvas import st_canvas
 
 # Función para analizar la operación matemática y dividirla en números y operadores
 def parse_expression(expression):
@@ -70,6 +69,17 @@ if st.button("Pintar"):
         canvas_width = 700
         canvas_height = 500
 
+        # Crear lienzo para el flujo de partículas usando streamlit-drawable-canvas
+        canvas = st_canvas(
+            stroke_width=2,
+            stroke_color="black",
+            background_color="white",
+            width=canvas_width,
+            height=canvas_height,
+            drawing_mode="freedraw",
+            key="canvas"
+        )
+
         # Generar las partículas basadas en la operación
         particles = generate_particle_flow(numbers, operators, canvas_width, canvas_height)
 
@@ -77,20 +87,33 @@ if st.button("Pintar"):
         for _ in range(30):  # Ejecutar varias iteraciones para simular el movimiento
             particles = update_particles(particles, canvas_width, canvas_height)
 
-            # Crear un gráfico con Matplotlib
-            fig, ax = plt.subplots(figsize=(7, 5))
-            ax.set_xlim(0, canvas_width)
-            ax.set_ylim(0, canvas_height)
-
-            # Dibujar las partículas
+            # Dibujar las partículas sobre el lienzo
             for particle in particles:
                 if particle['type'] == 'number':
-                    ax.scatter(particle['x'], particle['y'], c=particle['color'], label=f"Number: {particle['value']}")
-                elif particle['type'] == 'operator':
-                    ax.scatter(particle['x'], particle['y'], c=particle['color'], marker='x', label=f"Operator: {particle['value']}")
+                    canvas = st_canvas(
+                        stroke_width=5,
+                        stroke_color=particle['color'],
+                        background_color="white",
+                        width=canvas_width,
+                        height=canvas_height,
+                        drawing_mode="freedraw",
+                        key=f"particle_{particle['x']}_{particle['y']}",
+                        update_canvas=False
+                    )
+                    st.write(f"Partícula Número {particle['value']} en ({particle['x']:.2f}, {particle['y']:.2f})")
 
-            # Mostrar el gráfico en Streamlit
-            st.pyplot(fig)
+                elif particle['type'] == 'operator':
+                    canvas = st_canvas(
+                        stroke_width=5,
+                        stroke_color=particle['color'],
+                        background_color="white",
+                        width=canvas_width,
+                        height=canvas_height,
+                        drawing_mode="freedraw",
+                        key=f"operator_{particle['x']}_{particle['y']}",
+                        update_canvas=False
+                    )
+                    st.write(f"Partícula Operador {particle['value']} en ({particle['x']:.2f}, {particle['y']:.2f})")
 
             # Hacer una pausa entre iteraciones para simular el movimiento de las partículas
             time.sleep(0.1)
