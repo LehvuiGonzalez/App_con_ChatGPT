@@ -1,101 +1,113 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 from datetime import datetime
-import os
 
-# Ruta del archivo CSV para almacenar los datos
-csv_file = 'registro_finanzas.csv'
-
-# Función para almacenar los datos
-def guardar_datos(tipo, monto, fecha, presupuesto_restante):
-    data = {
-        'fecha': fecha,
-        'tipo': tipo,
-        'monto': monto,
-        'presupuesto_restante': presupuesto_restante
-    }
-    
-    # Verificar si el archivo CSV existe, si no, crear uno nuevo
-    if os.path.exists(csv_file):
-        df = pd.read_csv(csv_file)
-    else:
-        df = pd.DataFrame(columns=['fecha', 'tipo', 'monto', 'presupuesto_restante'])
-    
-    # Agregar la nueva entrada
-    df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
-    
-    # Guardar el DataFrame actualizado en el archivo CSV
-    df.to_csv(csv_file, index=False)
-    
+# Función para almacenar los datos en un DataFrame (simulando una base de datos simple)
+def obtener_datos():
+    try:
+        df = pd.read_csv("finanzas_personales.csv")
+    except FileNotFoundError:
+        df = pd.DataFrame(columns=["Fecha", "Categoria", "Monto", "Tipo", "Descripcion"])
     return df
 
-# Título de la app
-st.title("Registro de Finanzas Personales")
+# Función para guardar los datos en un CSV
+def guardar_datos(df):
+    df.to_csv("finanzas_personales.csv", index=False)
 
-# Entrada de datos
-st.header("Ingresar Ingresos o Gastos y Fecha")
-
-# Definir el presupuesto inicial
-presupuesto_inicial = st.number_input("Presupuesto Inicial en pesos", min_value=0.0, step=0.01, format="%.2f", value=0.0)
-
-# Opción para elegir si se ingresa un ingreso, un gasto o ambos
-tipo_transaccion = st.selectbox("¿Qué deseas registrar?", ["Ingreso", "Gasto", "Ingreso y Gasto"])
-
-# Ingreso de valores comunes
-fecha_seleccionada = st.date_input("Seleccionar fecha", value=datetime.today().date())
-
-# Si se selecciona "Ingreso" o "Gasto", muestra solo el campo correspondiente
-if tipo_transaccion == "Ingreso" or tipo_transaccion == "Ingreso y Gasto":
-    ingreso_monto = st.number_input("Monto del Ingreso en pesos", min_value=0.0, step=0.01, format="%.2f")
-else:
-    ingreso_monto = 0.0  # Si no es ingreso, no se pide
-
-if tipo_transaccion == "Gasto" or tipo_transaccion == "Ingreso y Gasto":
-    gasto_monto = st.number_input("Monto del Gasto en pesos", min_value=0.0, step=0.01, format="%.2f")
-else:
-    gasto_monto = 0.0  # Si no es gasto, no se pide
-
-# Botón para guardar los datos
-if st.button("Guardar Datos"):
-    # Inicializar el presupuesto restante
-    if os.path.exists(csv_file):
-        df = pd.read_csv(csv_file)
-        total_ingresos = df[df['tipo'] == 'Ingreso']['monto'].apply(lambda x: float(x.replace('$', '').replace(',', ''))).sum()
-        total_gastos = df[df['tipo'] == 'Gasto']['monto'].apply(lambda x: float(x.replace('$', '').replace(',', ''))).sum()
-        presupuesto_restante = presupuesto_inicial + total_ingresos - total_gastos
-    else:
-        presupuesto_restante = presupuesto_inicial
+# Pantalla principal
+def mostrar_dashboard():
+    st.title("App de Finanzas Personales")
     
-    # Ajustar el presupuesto restante según el tipo de transacción
-    if tipo_transaccion == "Ingreso" and ingreso_monto > 0:
-        presupuesto_restante += ingreso_monto  # Si es un ingreso, se suma al presupuesto
-        df = guardar_datos("Ingreso", ingreso_monto, fecha_seleccionada, presupuesto_restante)
-        st.write("Ingreso guardado correctamente")
-    elif tipo_transaccion == "Gasto" and gasto_monto > 0:
-        presupuesto_restante -= gasto_monto  # Si es un gasto, se resta del presupuesto
-        df = guardar_datos("Gasto", gasto_monto, fecha_seleccionada, presupuesto_restante)
-        st.write("Gasto guardado correctamente")
-    elif tipo_transaccion == "Ingreso y Gasto" and ingreso_monto > 0 and gasto_monto > 0:
-        # Si es "Ingreso y Gasto", se suman los ingresos y se restan los gastos
-        presupuesto_restante += ingreso_monto
-        presupuesto_restante -= gasto_monto
-        df_ingreso = guardar_datos("Ingreso", ingreso_monto, fecha_seleccionada, presupuesto_restante)
-        df_gasto = guardar_datos("Gasto", gasto_monto, fecha_seleccionada, presupuesto_restante)
-        st.write("Ingreso y Gasto guardados correctamente")
-    else:
-        st.write("Por favor ingresa un monto mayor a 0 para Ingreso o Gasto")
+    # Menú de navegación
+    opcion = st.sidebar.selectbox("Selecciona una opción", ["Inicio", "Ingresos", "Gastos", "Presupuestos", "Metas de Ahorro", "Reportes"])
 
-# Mostrar la tabla de registros
-st.subheader("Registros de Finanzas")
+    if opcion == "Inicio":
+        st.header("Bienvenido a tu Dashboard de Finanzas Personales")
+        df = obtener_datos()
+        st.write("Resumen de tu situación financiera")
+        st.write(f"Número total de transacciones: {len(df)}")
+        
+        ingresos = df[df['Tipo'] == 'Ingreso']['Monto'].sum()
+        gastos = df[df['Tipo'] == 'Gasto']['Monto'].sum()
+        st.write(f"Ingresos Totales: {ingresos}")
+        st.write(f"Gastos Totales: {gastos}")
+        st.write(f"Balance: {ingresos - gastos}")
 
-# Mostrar la tabla si el archivo CSV existe
-if os.path.exists(csv_file):
-    df = pd.read_csv(csv_file)
-    df['monto'] = df['monto'].apply(lambda x: f"${x:,.2f}")  # Formatear los montos como pesos
-    df['presupuesto_restante'] = df['presupuesto_restante'].apply(lambda x: f"${x:,.2f}")  # Formatear el presupuesto restante como pesos
-    st.write(df)
+    elif opcion == "Ingresos":
+        st.header("Registrar Ingreso")
+        monto = st.number_input("Monto del Ingreso", min_value=0.0, step=0.01)
+        categoria = st.text_input("Categoría del Ingreso")
+        descripcion = st.text_input("Descripción")
+        
+        if st.button("Guardar Ingreso"):
+            fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            df = obtener_datos()
+            df = df.append({"Fecha": fecha, "Categoria": categoria, "Monto": monto, "Tipo": "Ingreso", "Descripcion": descripcion}, ignore_index=True)
+            guardar_datos(df)
+            st.success("Ingreso guardado exitosamente!")
 
-else:
-    st.write("Aún no hay registros.")
+    elif opcion == "Gastos":
+        st.header("Registrar Gasto")
+        monto = st.number_input("Monto del Gasto", min_value=0.0, step=0.01)
+        categoria = st.text_input("Categoría del Gasto")
+        descripcion = st.text_input("Descripción")
+        
+        if st.button("Guardar Gasto"):
+            fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            df = obtener_datos()
+            df = df.append({"Fecha": fecha, "Categoria": categoria, "Monto": monto, "Tipo": "Gasto", "Descripcion": descripcion}, ignore_index=True)
+            guardar_datos(df)
+            st.success("Gasto guardado exitosamente!")
+
+    elif opcion == "Presupuestos":
+        st.header("Registrar Presupuesto")
+        categoria = st.text_input("Categoría del Presupuesto")
+        monto_presupuestado = st.number_input("Monto Presupuestado", min_value=0.0, step=0.01)
+        
+        if st.button("Guardar Presupuesto"):
+            # Aquí podrías guardar este presupuesto en otro archivo o DataFrame
+            st.success(f"Presupuesto para {categoria} guardado exitosamente!")
+
+    elif opcion == "Metas de Ahorro":
+        st.header("Establecer Meta de Ahorro")
+        meta = st.text_input("Nombre de la Meta de Ahorro")
+        monto_meta = st.number_input("Monto de la Meta", min_value=0.0, step=0.01)
+        
+        if st.button("Guardar Meta de Ahorro"):
+            st.success(f"Meta de ahorro '{meta}' guardada con un monto de {monto_meta}!")
+
+    elif opcion == "Reportes":
+        st.header("Reportes de Finanzas")
+        df = obtener_datos()
+        
+        # Reporte mensual
+        df['Fecha'] = pd.to_datetime(df['Fecha'])
+        df['Mes'] = df['Fecha'].dt.to_period('M')
+        
+        resumen_mensual = df.groupby([df['Mes'], 'Tipo']).agg({"Monto": "sum"}).unstack(fill_value=0)
+        st.write("Reporte Mensual")
+        st.write(resumen_mensual)
+
+        # Reporte semanal
+        df['Semana'] = df['Fecha'].dt.to_period('W')
+        resumen_semanal = df.groupby([df['Semana'], 'Tipo']).agg({"Monto": "sum"}).unstack(fill_value=0)
+        st.write("Reporte Semanal")
+        st.write(resumen_semanal)
+
+        # Graficos de comparación
+        st.write("Gráfico de Comparación de Ingresos y Gastos Mensuales")
+        resumen_mensual['Monto', 'Ingreso'].plot(kind='bar', label="Ingresos", color='green')
+        resumen_mensual['Monto', 'Gasto'].plot(kind='bar', label="Gastos", color='red', alpha=0.6)
+        plt.title('Comparación de Ingresos y Gastos Mensuales')
+        plt.xlabel('Mes')
+        plt.ylabel('Monto')
+        plt.xticks(rotation=45)
+        plt.legend()
+        st.pyplot(plt)
+
+if __name__ == "__main__":
+    mostrar_dashboard()
 
 
