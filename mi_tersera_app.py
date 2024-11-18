@@ -19,7 +19,7 @@ def mostrar_dashboard():
     st.title("App de Finanzas Personales")
     
     # Menú de navegación
-    opcion = st.sidebar.selectbox("Selecciona una opción", ["Inicio", "Ingresos", "Gastos", "Presupuestos", "Metas de Ahorro", "Reportes"])
+    opcion = st.sidebar.selectbox("Selecciona una opción", ["Inicio", "Ingresos", "Gastos", "Presupuestos", "Metas de Ahorro", "Reportes", "Sobre el Creador"])
 
     if opcion == "Inicio":
         st.header("Bienvenido a tu Dashboard de Finanzas Personales")
@@ -94,6 +94,11 @@ def mostrar_dashboard():
         st.write("Reporte Semanal")
         st.write(resumen_semanal)
 
+    elif opcion == "Sobre el Creador":
+        st.header("Sobre el Creador")
+        st.write("Esta app fue creada por **Lehvui Gonzalez Cardona**.")
+
 if __name__ == "__main__":
     mostrar_dashboard()
+
 
