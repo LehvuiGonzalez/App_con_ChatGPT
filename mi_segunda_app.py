@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Función principal de conversión
-def convert_units(category, conversion_type, value):
+def convert_units(conversion_type, value):
     conversions = {
         # Conversiones de temperatura
         "Celsius a Fahrenheit": lambda x: (x * 9/5) + 32,
@@ -67,7 +67,7 @@ def convert_units(category, conversion_type, value):
 
 # Configuración de la aplicación
 st.title("Conversor Universal en Tiempo Real")
-st.write("Selecciona una categoría, un tipo de conversión y proporciona un valor.")
+st.write("Selecciona una categoría, el tipo de conversión y proporciona un valor.")
 
 # Selección de categoría
 categories = {
@@ -83,17 +83,18 @@ categories = {
     "Tamaño de datos": ["Megabytes a gigabytes", "Gigabytes a Terabytes", "Kilobytes a megabytes", "Terabytes a petabytes"],
 }
 
+# Categoría y tipo de conversión
 category = st.selectbox("Selecciona una categoría", list(categories.keys()))
 conversion_type = st.selectbox("Selecciona un tipo de conversión", categories[category])
+
+# Unidades de entrada y salida
+input_unit = st.text_input("Unidad de entrada (por ejemplo, 10)".format(conversion_type))
+output_unit = st.text_input("Unidad de salida (por ejemplo, 100)".format(conversion_type))
 
 # Ingreso del valor para la conversión
 value = st.number_input("Ingresa el valor a convertir", min_value=0.0, step=0.1)
 
-# Mostrar el resultado en tiempo real
+# Si se ingresa un valor, realizar la conversión en tiempo real
 if value:
-    result = convert_units(category, conversion_type, value)
-    
-    # Mostrar detalles de la conversión
-    st.write(f"**Conversión seleccionada:** {conversion_type}")
-    st.write(f"**Valor ingresado:** {value}")
-    st.write(f"**Resultado:** {result}")
+    result = convert_units(conversion_type, value)
+    st.write(f"Se ha convertido: {value} {input_unit} a {result} {output_unit}.")
