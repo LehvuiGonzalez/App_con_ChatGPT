@@ -89,11 +89,8 @@ conversion_type = st.selectbox("Selecciona un tipo de conversión", categories[c
 # Ingreso del valor para la conversión
 value = st.number_input("Ingresa el valor a convertir", min_value=0.0, step=0.1)
 
-# Mostrar el resultado en tiempo real
+# Si se ingresa un valor, realizar la conversión en tiempo real
 if value:
     result = convert_units(category, conversion_type, value)
-    
-    # Mostrar detalles de la conversión
-    st.write(f"**Conversión seleccionada:** {conversion_type}")
-    st.write(f"**Valor ingresado:** {value}")
-    st.write(f"**Resultado:** {result}")
+    st.write(f"El resultado de la conversión es: {result}")
+
