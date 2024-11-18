@@ -63,6 +63,7 @@ def convert_units(category, conversion_type, value):
         "Kilobytes a megabytes": lambda x: x / 1024,
         "Terabytes a petabytes": lambda x: x / 1024,
     }
+
     return conversions[conversion_type](value)
 
 # Configuración de la aplicación
@@ -92,5 +93,4 @@ value = st.number_input("Ingresa el valor a convertir", min_value=0.0, step=0.1)
 # Si se ingresa un valor, realizar la conversión en tiempo real
 if value:
     result = convert_units(category, conversion_type, value)
-    st.write(f"El resultado de la conversión es: {result}")
-
+    st.write(f"El resultado de la conversión de {conversion_type.split(' a ')[0]} a {conversion_type.split(' a ')[1]} es: {result}")
