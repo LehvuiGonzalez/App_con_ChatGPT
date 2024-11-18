@@ -8,16 +8,6 @@ def parse_expression(expression):
     operators = [s for s in expression.split() if not s.isdigit()]
     return numbers, operators
 
-# Función para calcular el resultado de una operación matemática
-def calculate_result(numbers, operators):
-    # Construir la expresión matemática como una cadena
-    expression = ''.join(f'{num}{op}' for num, op in zip(numbers, operators)) + str(numbers[-1])
-    try:
-        result = eval(expression)  # Evaluar la expresión matemática
-    except Exception as e:
-        result = f"Error: {e}"  # Si hay un error en la expresión, lo mostramos
-    return result
-
 # Función para generar el flujo de partículas a partir de la operación
 def generate_particle_flow(numbers, operators, canvas_width, canvas_height):
     particles = []
@@ -50,19 +40,7 @@ def generate_particle_flow(numbers, operators, canvas_width, canvas_height):
         })
         x_pos += 50  # Desplazamiento horizontal
 
-    # Calcular el resultado de la operación
-    result = calculate_result(numbers, operators)
-    particles.append({
-        'type': 'result',
-        'value': result,
-        'x': x_pos,
-        'y': y_pos,
-        'dx': random.uniform(1, 3),
-        'dy': random.uniform(-1, 1),
-        'color': random.choice(['red', 'green', 'blue', 'orange', 'purple', 'yellow'])  # Color aleatorio
-    })
-
-    return particles, result
+    return particles
 
 # Función para actualizar las partículas
 def update_particles(particles, canvas_width, canvas_height):
@@ -93,8 +71,8 @@ if st.button("Pintar"):
         # Crear lienzo para el flujo de partículas
         canvas = st.empty()  # Este será el espacio para actualizar las partículas
 
-        # Generar y mostrar el flujo de partículas
-        particles, result = generate_particle_flow(numbers, operators, canvas_width, canvas_height)
+        # Generar las partículas basadas en la operación
+        particles = generate_particle_flow(numbers, operators, canvas_width, canvas_height)
 
         # Simular el movimiento de las partículas
         for _ in range(30):  # Ejecutar varias iteraciones para simular el movimiento
@@ -102,8 +80,6 @@ if st.button("Pintar"):
 
             # Crear el lienzo y dibujar las partículas
             canvas.markdown("### Operación en flujo de partículas")
-
-            # Dibuja las partículas en el lienzo de Streamlit
             canvas.markdown("<br>")
             for particle in particles:
                 particle_position = f"({particle['x']:.2f}, {particle['y']:.2f})"
@@ -111,11 +87,7 @@ if st.button("Pintar"):
                     canvas.markdown(f"<span style='color:{particle['color']}'>**Número:** {particle['value']} en posición {particle_position}</span>")
                 elif particle['type'] == 'operator':
                     canvas.markdown(f"<span style='color:{particle['color']}'>**Operador:** {particle['value']} en posición {particle_position}</span>")
-                elif particle['type'] == 'result':
-                    canvas.markdown(f"<span style='color:{particle['color']}'>**Resultado:** {particle['value']} en posición {particle_position}</span>")
             
             # Hacer una pausa entre iteraciones para simular el movimiento de las partículas
             time.sleep(0.1)
 
-        # Mostrar el resultado de la operación
-        st.write(f"El resultado de la operación es: {result}")
