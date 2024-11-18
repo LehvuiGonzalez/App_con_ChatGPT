@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 from datetime import datetime
 
 # Función para almacenar los datos en un DataFrame (simulando una base de datos simple)
@@ -96,18 +94,6 @@ def mostrar_dashboard():
         st.write("Reporte Semanal")
         st.write(resumen_semanal)
 
-        # Graficos de comparación
-        st.write("Gráfico de Comparación de Ingresos y Gastos Mensuales")
-        resumen_mensual['Monto', 'Ingreso'].plot(kind='bar', label="Ingresos", color='green')
-        resumen_mensual['Monto', 'Gasto'].plot(kind='bar', label="Gastos", color='red', alpha=0.6)
-        plt.title('Comparación de Ingresos y Gastos Mensuales')
-        plt.xlabel('Mes')
-        plt.ylabel('Monto')
-        plt.xticks(rotation=45)
-        plt.legend()
-        st.pyplot(plt)
-
 if __name__ == "__main__":
     mostrar_dashboard()
-
 
