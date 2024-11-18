@@ -66,14 +66,19 @@ if st.button("Guardar Datos"):
     else:
         presupuesto_restante = presupuesto_inicial
     
-    # Guardar los datos en función de la transacción seleccionada
+    # Ajustar el presupuesto restante según el tipo de transacción
     if tipo_transaccion == "Ingreso" and ingreso_monto > 0:
+        presupuesto_restante += ingreso_monto  # Si es un ingreso, se suma al presupuesto
         df = guardar_datos("Ingreso", ingreso_monto, fecha_seleccionada, presupuesto_restante)
         st.write("Ingreso guardado correctamente")
     elif tipo_transaccion == "Gasto" and gasto_monto > 0:
+        presupuesto_restante -= gasto_monto  # Si es un gasto, se resta del presupuesto
         df = guardar_datos("Gasto", gasto_monto, fecha_seleccionada, presupuesto_restante)
         st.write("Gasto guardado correctamente")
     elif tipo_transaccion == "Ingreso y Gasto" and ingreso_monto > 0 and gasto_monto > 0:
+        # Si es "Ingreso y Gasto", se suman los ingresos y se restan los gastos
+        presupuesto_restante += ingreso_monto
+        presupuesto_restante -= gasto_monto
         df_ingreso = guardar_datos("Ingreso", ingreso_monto, fecha_seleccionada, presupuesto_restante)
         df_gasto = guardar_datos("Gasto", gasto_monto, fecha_seleccionada, presupuesto_restante)
         st.write("Ingreso y Gasto guardados correctamente")
@@ -92,7 +97,5 @@ if os.path.exists(csv_file):
 
 else:
     st.write("Aún no hay registros.")
-
-
 
 
