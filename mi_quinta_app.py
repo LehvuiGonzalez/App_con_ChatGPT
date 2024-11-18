@@ -1,25 +1,45 @@
 import streamlit as st
-import folium
-from streamlit_folium import st_folium
+import pandas as pd
+import requests
 
-# Título de la aplicación
-st.title("Mapa Interactivo de Coordenadas")
+# Título de la app
+st.title("Análisis de Datos desde una API con Pandas")
 
-# Ingreso de coordenadas
-st.header("Ingresa las coordenadas (Latitud y Longitud)")
+# URL de la API (usaremos una API pública que devuelve datos en formato JSON)
+url = 'https://jsonplaceholder.typicode.com/posts'
 
-latitude = st.number_input("Latitud", min_value=-90.0, max_value=90.0, value=20.0)
-longitude = st.number_input("Longitud", min_value=-180.0, max_value=180.0, value=-90.0)
+# Realizar la solicitud a la API
+response = requests.get(url)
 
-# Crear un mapa en Folium centrado en las coordenadas iniciales
-map_center = [latitude, longitude]
-my_map = folium.Map(location=map_center, zoom_start=10)
-
-# Añadir un marcador en las coordenadas proporcionadas por el usuario
-folium.Marker([latitude, longitude], popup=f'Coordenadas: {latitude}, {longitude}').add_to(my_map)
-
-# Mostrar el mapa interactivo en Streamlit
-st_folium(my_map, width=700, height=500)
-
-# Mostrar las coordenadas ingresadas por el usuario
-st.write(f"Has ingresado las coordenadas: Latitud {latitude}, Longitud {longitude}")
+# Verificar si la solicitud fue exitosa (código 200)
+if response.status_code == 200:
+    # Convertir el JSON en un DataFrame de Pandas
+    data = response.json()
+    df = pd.DataFrame(data)
+    
+    # Mostrar las primeras filas del DataFrame
+    st.subheader("Vista previa de los datos")
+    st.write(df.head())  # Mostrar las primeras 5 filas del JSON convertido a DataFrame
+    
+    # Estadísticas básicas del DataFrame
+    st.subheader("Estadísticas descriptivas")
+    st.write(df.describe())  # Estadísticas como media, desviación estándar, etc.
+    
+    # Verificar si hay valores nulos
+    st.subheader("Valores nulos")
+    st.write(df.isnull().sum())  # Mostrar la cantidad de valores nulos por columna
+    
+    # Permitir que el usuario seleccione una columna
+    st.subheader("Explorar una columna")
+    column = st.selectbox("Selecciona una columna para visualizar:", df.columns)
+    
+    # Mostrar los datos de la columna seleccionada
+    if column:
+        st.write(f"Contenido de la columna {column}:")
+        st.write(df[column])  # Mostrar la columna seleccionada
+    
+    # Mostrar el número de filas y columnas
+    st.write(f"El conjunto de datos contiene {df.shape[0]} filas y {df.shape[1]} columnas.")
+    
+else:
+    st.error(f"Error al obtener los datos de la API. Código de estado: {response.status_code}")
