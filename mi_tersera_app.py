@@ -28,12 +28,18 @@ st.write("Creador: Lehvui Gonzalez Cardona")
 # Entrada de datos
 st.header("Ingresar Datos Financieros")
 
+# Ingreso de valores
 ingresos = st.number_input("Ingresos", min_value=0.0, step=0.01)
 gastos = st.number_input("Gastos", min_value=0.0, step=0.01)
 presupuesto = st.number_input("Presupuesto", min_value=0.0, step=0.01)
 
 # Seleccionar fecha o usar la actual
 fecha_seleccionada = st.date_input("Seleccionar fecha", value=datetime.today().date())
+
+# Mostrar los valores actuales del presupuesto, ingresos y gastos
+st.write(f"**Presupuesto Actual:** {presupuesto}")
+st.write(f"**Ingresos Actuales:** {ingresos}")
+st.write(f"**Gastos Actuales:** {gastos}")
 
 # Botón para guardar los datos
 if st.button("Guardar Datos"):
@@ -44,7 +50,7 @@ if st.button("Guardar Datos"):
 # Mostrar el reporte de diferencias
 st.header("Reporte de Diferencias")
 
-# Crear un DataFrame vacío para mostrar los datos del reporte
+# Crear un DataFrame con los datos actuales para mostrar el reporte
 df_existing = pd.DataFrame({
     'fecha': [fecha_seleccionada],
     'ingresos': [ingresos],
