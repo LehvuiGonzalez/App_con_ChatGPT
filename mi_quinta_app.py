@@ -109,4 +109,3 @@ if expression:
     # Mostrar el resultado de la operación
     st.write(f"El resultado de la operación es: {result}")
 
-
