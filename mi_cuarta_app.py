@@ -57,4 +57,23 @@ if materias:
     df = pd.DataFrame({
         'Materia': materias,
         'Calificación': calificaciones,
-        'Créditos': cred
+        'Créditos': creditos,
+        'Tipo': tipos
+    })
+    st.write(df)
+
+# Una vez que el usuario haya ingresado todas las materias, calcular el PAPA global y por tipología
+if len(materias) > 0:
+    # Botón para calcular el PAPA global
+    if st.button("Calcular PAPA Global"):
+        papa_global = calcular_papa(df)
+        st.write(f"**PAPA Global:** {papa_global:.2f}")
+
+    # Selección para calcular el PAPA por tipo de asignatura
+    tipo_asignatura = st.selectbox("Selecciona el tipo de asignatura para calcular el PAPA por tipología", df['Tipo'].unique())
+    
+    # Botón para calcular el PAPA por tipología
+    if st.button(f"Calcular PAPA para '{tipo_asignatura}'"):
+        papa_tipologia = calcular_papa_por_tipologia(df, tipo_asignatura)
+        st.write(f"**PAPA por tipo '{tipo_asignatura}':** {papa_tipologia:.2f}")
+
