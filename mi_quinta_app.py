@@ -8,6 +8,16 @@ def parse_expression(expression):
     operators = [s for s in expression.split() if not s.isdigit()]
     return numbers, operators
 
+# Función para calcular el resultado de una operación matemática
+def calculate_result(numbers, operators):
+    # Construir la expresión matemática como una cadena
+    expression = ''.join(f'{num}{op}' for num, op in zip(numbers, operators)) + str(numbers[-1])
+    try:
+        result = eval(expression)  # Evaluar la expresión matemática
+    except Exception as e:
+        result = f"Error: {e}"  # Si hay un error en la expresión, lo mostramos
+    return result
+
 # Función para generar el flujo de partículas a partir de la operación
 def generate_particle_flow(numbers, operators, canvas_width, canvas_height):
     particles = []
@@ -40,8 +50,8 @@ def generate_particle_flow(numbers, operators, canvas_width, canvas_height):
         })
         x_pos += 50  # Desplazamiento horizontal
 
-    # Crear una partícula para el resultado de la operación
-    result = eval(' '.join([str(num) for num in numbers] + operators))
+    # Calcular el resultado de la operación
+    result = calculate_result(numbers, operators)
     particles.append({
         'type': 'result',
         'value': result,
