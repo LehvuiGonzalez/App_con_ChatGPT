@@ -31,11 +31,6 @@ def guardar_datos(ingresos, gastos, presupuesto, fecha, meta_ahorro):
     return df
 
 # Función para calcular las diferencias
-def calcular_diferencias(df):
-    df['diferencia'] = df['presupuesto'] - (df['ingresos'] - df['gastos'])
-    return df
-
-# Función para inferir el presupuesto
 def inferir_presupuesto(ingresos, gastos):
     # Podemos usar un porcentaje de los ingresos para inferir el presupuesto
     porcentaje_presupuesto = 0.7  # 70% de los ingresos
@@ -89,15 +84,3 @@ if st.button("Limpiar Datos"):
     presupuesto = 0.0
     meta_ahorro = 0.0
     st.experimental_rerun()
-
-# Mostrar el reporte de diferencias
-st.header("Reporte de Diferencias")
-
-# Cargar los datos históricos desde el archivo CSV
-if os.path.exists(csv_file):
-    df_existing = pd.read_csv(csv_file)
-    df_report = calcular_diferencias(df_existing)
-    st.write("Reporte de las diferencias entre lo presupuestado y lo real:")
-    st.write(df_report)
-else:
-    st.write("No hay datos disponibles para mostrar.")
