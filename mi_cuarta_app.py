@@ -1,3 +1,4 @@
+import streamlit as st
 import pandas as pd
 
 # Función para calcular el PAPA
